@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AuthorizationManagement.Api.Models.Internal
 {
+    [ExcludeFromCodeCoverage]
     public class User : Models.User, IDocument
     {
         #region ctor
@@ -12,8 +14,9 @@ namespace AuthorizationManagement.Api.Models.Internal
 
         }
 
-        public User(Models.User user)
+        public User(string applicationId, Models.User user)
         {
+            ApplicationId = applicationId;
             Id = user.Id;
             Email = user.Email;
             Enabled = user.Enabled;

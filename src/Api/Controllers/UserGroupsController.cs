@@ -30,7 +30,7 @@ namespace AuthorizationManagement.Api.Controllers
             var userGroup = await Container.SingleOrDefaultAsync<UserGroup>(query).ConfigureAwait(false);
             if (userGroup != null) return Ok(userGroup);
 
-            userGroup = new UserGroup(userGroupDto) { ApplicationId = applicationId };
+            userGroup = new UserGroup(applicationId, userGroupDto);
             userGroup = await CreateAsync(userGroup).ConfigureAwait(false);
 
             return Ok(new { userGroup.Id, userGroup.GroupId, userGroup.UserId});

@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AuthorizationManagement.Api.Models.Internal
 {
+    [ExcludeFromCodeCoverage]
     public class Application : Models.Application, IDocument
     {
         #region ctor

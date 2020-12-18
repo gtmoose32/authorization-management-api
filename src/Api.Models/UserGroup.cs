@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json;
-using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AuthorizationManagement.Api.Models
 {
-    public class UserGroup
+    [ExcludeFromCodeCoverage]
+    public class UserGroup : ModelBase
     {
-        [JsonProperty("id")]
-        public string Id { get; set; } = Guid.NewGuid().ToString();
-
         [JsonProperty("userId")]
         public string UserId { get; set; }
 

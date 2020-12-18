@@ -60,7 +60,7 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.User userDto)
         {
-            var user = new User(userDto) { ApplicationId = applicationId };
+            var user = new User(applicationId, userDto);
 
             await CreateAsync(user).ConfigureAwait(false);
             await IncrementUserCountAsync(applicationId).ConfigureAwait(false);

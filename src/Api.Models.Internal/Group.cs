@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AuthorizationManagement.Api.Models.Internal
 {
+    [ExcludeFromCodeCoverage]
     public class Group : Models.Group, IDocument
     {
         #region ctor
@@ -11,8 +13,9 @@ namespace AuthorizationManagement.Api.Models.Internal
         {
         }
 
-        public Group(Models.Group group)
+        public Group(string applicationId, Models.Group group)
         {
+            ApplicationId = applicationId;
             Id = group.Id;
             Name = group.Id;
         }

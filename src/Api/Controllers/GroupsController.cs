@@ -59,7 +59,7 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.Group groupDto)
         {
-            var group = new Group(groupDto) { ApplicationId = applicationId };
+            var group = new Group(applicationId, groupDto);
 
             await CreateAsync(group).ConfigureAwait(false);
             await IncrementGroupCountAsync(applicationId).ConfigureAwait(false);

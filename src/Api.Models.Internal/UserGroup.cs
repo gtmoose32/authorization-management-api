@@ -12,8 +12,9 @@ namespace AuthorizationManagement.Api.Models.Internal
 
         }
 
-        public UserGroup(Models.UserGroup userGroup)
+        public UserGroup(string applicationId, Models.UserGroup userGroup)
         {
+            ApplicationId = applicationId;
             Id = userGroup.Id;
             GroupId = userGroup.GroupId;
             UserId = userGroup.UserId;
