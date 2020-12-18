@@ -26,9 +26,9 @@ namespace AuthorizationManagement.Api.Controllers
         {
             var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = '{DocumentType}'");
             var options = new QueryRequestOptions { MaxItemCount = 1000 };
-
+            
             var apps = await Container.WhereAsync<Application>(query, options).ConfigureAwait(false);
-            return Ok(apps.Select(a => Mapper.Map<Models.Application>(a)));
+            return Ok(apps.Select(a => Mapper.Map<Models.Application>(a)).ToArray());
         }
         
         // GET api/<ApplicationsController>/5

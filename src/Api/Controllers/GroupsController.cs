@@ -26,7 +26,7 @@ namespace AuthorizationManagement.Api.Controllers
         public async Task<IActionResult> GetAllAsync([FromRoute] string applicationId)
         {
             var groups = await GetDocumentsAsync(applicationId).ConfigureAwait(false);
-            return Ok(groups.Select(g => Mapper.Map<Models.Group>(g)));
+            return Ok(groups.Select(g => Mapper.Map<Models.Group>(g)).ToArray());
         }
 
         // GET api/<UsersController>/5
@@ -52,7 +52,7 @@ namespace AuthorizationManagement.Api.Controllers
 
             var users = await Container.WhereAsync<User>(query).ConfigureAwait(false);
 
-            return Ok(users.Select(u => new { u.Id, u.Email, u.Enabled, u.FirstName, u.LastName }));
+            return Ok(users.Select(u => Mapper.Map<Models.User>(u)).ToArray());
         }
 
         // POST api/<UsersController>
