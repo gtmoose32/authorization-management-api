@@ -8,19 +8,6 @@ namespace AuthorizationManagement.Api.Models.Internal
     [ExcludeFromCodeCoverage]
     public class Group : Models.Group, IDocument
     {
-        #region ctor
-        public Group()
-        {
-        }
-
-        public Group(string applicationId, Models.Group group)
-        {
-            ApplicationId = applicationId;
-            Id = group.Id;
-            Name = group.Id;
-        }
-        #endregion
-
         [JsonProperty("applicationId")]
         public string ApplicationId { get; set; }
 

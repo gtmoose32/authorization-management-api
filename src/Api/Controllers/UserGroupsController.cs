@@ -1,4 +1,5 @@
 ﻿using AuthorizationManagement.Api.Models.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -11,8 +12,8 @@ namespace AuthorizationManagement.Api.Controllers
     [ApiController]
     public class UserGroupsController : ContainerControllerBase<UserGroup>
     {
-        public UserGroupsController(Container container) 
-            : base(container, DocumentType.UserGroup)
+        public UserGroupsController(Container container, IMapper mapper) 
+            : base(container, mapper, DocumentType.UserGroup)
         {
         }
 
@@ -30,10 +31,11 @@ namespace AuthorizationManagement.Api.Controllers
             var userGroup = await Container.SingleOrDefaultAsync<UserGroup>(query).ConfigureAwait(false);
             if (userGroup != null) return Ok(userGroup);
 
-            userGroup = new UserGroup(applicationId, userGroupDto);
+            userGroup = Mapper.Map<UserGroup>(userGroupDto);
+            userGroup.ApplicationId = applicationId;
             userGroup = await CreateAsync(userGroup).ConfigureAwait(false);
 
-            return Ok(new { userGroup.Id, userGroup.GroupId, userGroup.UserId});
+            return Ok(Mapper.Map<Models.UserGroup>(userGroup));
         }
 
         // DELETE api/<UsersController>/5

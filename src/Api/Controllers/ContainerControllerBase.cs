@@ -1,4 +1,5 @@
 ﻿using AuthorizationManagement.Api.Models.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
@@ -12,11 +13,14 @@ namespace AuthorizationManagement.Api.Controllers
         where T : class, IDocument
     {
         protected Container Container { get; }
+        protected IMapper Mapper { get; }
+        
         protected DocumentType DocumentType { get; }
 
-        protected ContainerControllerBase(Container container, DocumentType documentType)
+        protected ContainerControllerBase(Container container, IMapper mapper, DocumentType documentType)
         {
             Container = container;
+            Mapper = mapper;
             DocumentType = documentType;
         }
 

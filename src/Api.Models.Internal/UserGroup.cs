@@ -6,21 +6,6 @@ namespace AuthorizationManagement.Api.Models.Internal
 {
     public class UserGroup : Models.UserGroup, IDocument
     {
-        #region ctor
-        public UserGroup()
-        {
-
-        }
-
-        public UserGroup(string applicationId, Models.UserGroup userGroup)
-        {
-            ApplicationId = applicationId;
-            Id = userGroup.Id;
-            GroupId = userGroup.GroupId;
-            UserId = userGroup.UserId;
-        } 
-        #endregion
-
         [JsonProperty("applicationId")]
         public string ApplicationId { get; set; }
 

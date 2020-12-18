@@ -8,23 +8,6 @@ namespace AuthorizationManagement.Api.Models.Internal
     [ExcludeFromCodeCoverage]
     public class User : Models.User, IDocument
     {
-        #region ctor
-        public User()
-        {
-
-        }
-
-        public User(string applicationId, Models.User user)
-        {
-            ApplicationId = applicationId;
-            Id = user.Id;
-            Email = user.Email;
-            Enabled = user.Enabled;
-            FirstName = user.FirstName;
-            LastName = user.LastName;
-        }
-        #endregion
-
         [JsonProperty("applicationId")]
         public string ApplicationId { get; set; }
 

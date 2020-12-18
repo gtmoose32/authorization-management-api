@@ -1,4 +1,5 @@
 ﻿using AuthorizationManagement.Api.Models.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -15,8 +16,8 @@ namespace AuthorizationManagement.Api.Controllers
     [ApiController]
     public class UsersController : ContainerControllerBase<User>
     {
-        public UsersController(Container container)
-            : base(container, DocumentType.User)
+        public UsersController(Container container, IMapper mapper)
+            : base(container, mapper, DocumentType.User)
         {
         }
 
@@ -26,7 +27,7 @@ namespace AuthorizationManagement.Api.Controllers
         public async Task<IActionResult> GetAllAsync([FromRoute] string applicationId)
         {
             var users = await GetDocumentsAsync(applicationId).ConfigureAwait(false);
-            return Ok(users.Select(u => new { u.Email, u.Id, u.FirstName, u.LastName, u.Enabled }));
+            return Ok(users.Select(u => Mapper.Map<Models.User>(u)));
         }
 
         // GET api/<UsersController>/5
@@ -37,7 +38,7 @@ namespace AuthorizationManagement.Api.Controllers
             var user = await GetDocumentAsync(applicationId, id).ConfigureAwait(false);
             if (user == null) return NotFound();
 
-            return Ok(new { user.FirstName, user.LastName, user.Email, user.Id, user.Enabled });
+            return Ok(Mapper.Map<Models.User>(user));
         }
 
         [ProducesResponseType(typeof(IEnumerable<Models.Group>), StatusCodes.Status200OK)]
@@ -52,7 +53,7 @@ namespace AuthorizationManagement.Api.Controllers
 
             var groups = await Container.WhereAsync<Group>(query).ConfigureAwait(false);
 
-            return Ok(groups.Select(g => new { g.Id, g.Name }));
+            return Ok(groups.Select(g => Mapper.Map<Models.Group>(g)));
         }
 
         // POST api/<UsersController>
@@ -60,8 +61,9 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.User userDto)
         {
-            var user = new User(applicationId, userDto);
-
+            var user = Mapper.Map<User>(userDto);
+            user.ApplicationId = applicationId;
+            
             await CreateAsync(user).ConfigureAwait(false);
             await IncrementUserCountAsync(applicationId).ConfigureAwait(false);
 
@@ -75,10 +77,7 @@ namespace AuthorizationManagement.Api.Controllers
             var user = await GetDocumentAsync(applicationId, id).ConfigureAwait(false);
             if (user == null) return NotFound();
 
-            user.Email = userDto.Email;
-            user.FirstName = userDto.FirstName;
-            user.LastName = userDto.LastName;
-            user.Enabled = userDto.Enabled;
+            user = Mapper.Map(userDto, user);
 
             await Container.ReplaceItemAsync(user, id, new PartitionKey(applicationId), new ItemRequestOptions { IfMatchEtag = user.ETag })
                 .ConfigureAwait(false);

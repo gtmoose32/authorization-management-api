@@ -8,17 +8,6 @@ namespace AuthorizationManagement.Api.Models.Internal
     [ExcludeFromCodeCoverage]
     public class Application : Models.Application, IDocument
     {
-        #region ctor
-        public Application()
-        {
-        }
-
-        public Application(Models.Application app)
-        {
-            Name = app.Name;
-        } 
-        #endregion
-
         [JsonProperty("applicationId")]
         public string ApplicationId => Id;
 

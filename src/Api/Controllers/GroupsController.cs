@@ -1,4 +1,5 @@
 ﻿using AuthorizationManagement.Api.Models.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -14,8 +15,8 @@ namespace AuthorizationManagement.Api.Controllers
     [ApiController]
     public class GroupsController : ContainerControllerBase<Group>
     {
-        public GroupsController(Container container)
-            : base(container, DocumentType.Group)
+        public GroupsController(Container container, IMapper mapper)
+            : base(container, mapper, DocumentType.Group)
         {
         }
 
@@ -25,7 +26,7 @@ namespace AuthorizationManagement.Api.Controllers
         public async Task<IActionResult> GetAllAsync([FromRoute] string applicationId)
         {
             var groups = await GetDocumentsAsync(applicationId).ConfigureAwait(false);
-            return Ok(groups.Select(g => new { g.Id, g.Name }));
+            return Ok(groups.Select(g => Mapper.Map<Models.Group>(g)));
         }
 
         // GET api/<UsersController>/5
@@ -36,7 +37,7 @@ namespace AuthorizationManagement.Api.Controllers
             var group = await GetDocumentAsync(applicationId, id).ConfigureAwait(false);
             if (group == null) return NotFound();
 
-            return Ok(new { group.Id, group.Name });
+            return Ok(Mapper.Map<Models.Group>(group));
         }
 
         [ProducesResponseType(typeof(IEnumerable<Models.User>), StatusCodes.Status200OK)]
@@ -59,7 +60,8 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.Group groupDto)
         {
-            var group = new Group(applicationId, groupDto);
+            var group = Mapper.Map<Group>(groupDto);
+            group.ApplicationId = applicationId;
 
             await CreateAsync(group).ConfigureAwait(false);
             await IncrementGroupCountAsync(applicationId).ConfigureAwait(false);
@@ -79,7 +81,7 @@ namespace AuthorizationManagement.Api.Controllers
             await Container.ReplaceItemAsync(group, id, new PartitionKey(applicationId), new ItemRequestOptions { IfMatchEtag = group.ETag })
                 .ConfigureAwait(false);
 
-            return Ok();
+            return Ok(groupDto);
         }
 
         // DELETE api/<UsersController>/5
