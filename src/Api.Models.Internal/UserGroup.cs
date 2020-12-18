@@ -1,22 +1,23 @@
-﻿using AuthorizationManagement.Shared.Dto;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 
-namespace AuthorizationManagement.Shared
+namespace AuthorizationManagement.Api.Models.Internal
 {
-    public class Group : GroupDto, IDocument
+    public class UserGroup : Models.UserGroup, IDocument
     {
         #region ctor
-        public Group()
+        public UserGroup()
         {
+
         }
 
-        public Group(GroupDto group)
+        public UserGroup(Models.UserGroup userGroup)
         {
-            Id = group.Id;
-            Name = group.Id;
-        }
+            Id = userGroup.Id;
+            GroupId = userGroup.GroupId;
+            UserId = userGroup.UserId;
+        } 
         #endregion
 
         [JsonProperty("applicationId")]
@@ -24,7 +25,7 @@ namespace AuthorizationManagement.Shared
 
         [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("documentType")]
-        public DocumentType DocumentType => DocumentType.Group;
+        public DocumentType DocumentType => DocumentType.UserGroup;
 
         [JsonConverter(typeof(UnixDateTimeConverter))]
         [JsonProperty(PropertyName = "_ts")]

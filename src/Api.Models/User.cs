@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace AuthorizationManagement.Shared.Dto
+namespace AuthorizationManagement.Api.Models
 {
-    public class UserDto
+    public class User
     {
         [JsonProperty("id")]
         public string Id { get; set; } = Guid.NewGuid().ToString();

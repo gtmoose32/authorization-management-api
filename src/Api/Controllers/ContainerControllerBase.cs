@@ -1,4 +1,4 @@
-﻿using AuthorizationManagement.Shared;
+﻿using AuthorizationManagement.Api.Models.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;

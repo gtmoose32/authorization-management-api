@@ -1,11 +1,10 @@
-﻿using AuthorizationManagement.Shared.Dto;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 
-namespace AuthorizationManagement.Shared
+namespace AuthorizationManagement.Api.Models.Internal
 {
-    public class User : UserDto, IDocument
+    public class User : Models.User, IDocument
     {
         #region ctor
         public User()
@@ -13,7 +12,7 @@ namespace AuthorizationManagement.Shared
 
         }
 
-        public User(UserDto user)
+        public User(Models.User user)
         {
             Id = user.Id;
             Email = user.Email;

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>AuthorizationManagement.Api.Models.Internal</AssemblyName>
+    <RootNamespace>AuthorizationManagement.Api.Models.Internal</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Api.Models\Api.Models.csproj" />
+  </ItemGroup>
+
+</Project>

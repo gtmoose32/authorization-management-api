@@ -1,5 +1,4 @@
-﻿using AuthorizationManagement.Shared;
-using AuthorizationManagement.Shared.Dto;
+﻿using AuthorizationManagement.Api.Models.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -18,9 +17,9 @@ namespace AuthorizationManagement.Api.Controllers
         }
 
         // POST api/<UsersController>
-        [ProducesResponseType(typeof(UserGroupDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.UserGroup), StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromRoute]string applicationId, [FromBody]UserGroupDto userGroupDto)
+        public async Task<IActionResult> PostAsync([FromRoute]string applicationId, [FromBody]Models.UserGroup userGroupDto)
         {
             var query = new QueryDefinition(
                     $"SELECT * FROM c WHERE c.documentType = '{DocumentType}' AND c.applicationId = @applicationId AND c.userId = @userId AND c.groupId = @groupId")

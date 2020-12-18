@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Converters;
 using System;
 
-namespace AuthorizationManagement.Shared
+namespace AuthorizationManagement.Api.Models.Internal
 {
     public interface IDocument
     {

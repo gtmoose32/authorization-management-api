@@ -1,4 +1,4 @@
-﻿namespace AuthorizationManagement.Shared
+﻿namespace AuthorizationManagement.Api.Models.Internal
 {
     public enum DocumentType
     {

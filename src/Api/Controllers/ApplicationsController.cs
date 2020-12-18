@@ -1,5 +1,4 @@
-﻿using AuthorizationManagement.Shared;
-using AuthorizationManagement.Shared.Dto;
+﻿using AuthorizationManagement.Api.Models.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -20,7 +19,7 @@ namespace AuthorizationManagement.Api.Controllers
         }
         
         // GET: api/<ApplicationsController>
-        [ProducesResponseType(typeof(IEnumerable<ApplicationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<Models.Application>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
@@ -32,7 +31,7 @@ namespace AuthorizationManagement.Api.Controllers
         }
         
         // GET api/<ApplicationsController>/5
-        [ProducesResponseType(typeof(ApplicationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.Application), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(string id)
         {
@@ -43,9 +42,9 @@ namespace AuthorizationManagement.Api.Controllers
         }
 
         // POST api/<ApplicationsController>
-        [ProducesResponseType(typeof(ApplicationDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Models.Application), StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] ApplicationDto appDto)
+        public async Task<IActionResult> PostAsync([FromBody] Models.Application appDto)
         {
             var app = new Application(appDto)
             {
@@ -54,7 +53,7 @@ namespace AuthorizationManagement.Api.Controllers
             };
 
             app = await CreateAsync(app).ConfigureAwait(false);
-            return CreatedAtRoute(nameof(GetAsync), new {id = app.Id}, new { app.Id, app.Name, app.GroupCount, app.UserCount });
+            return Ok(new { app.Id, app.Name, app.GroupCount, app.UserCount });
         }
     }
 }

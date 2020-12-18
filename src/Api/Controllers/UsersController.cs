@@ -1,12 +1,12 @@
-﻿using AuthorizationManagement.Shared;
-using AuthorizationManagement.Shared.Dto;
+﻿using AuthorizationManagement.Api.Models.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using User = AuthorizationManagement.Shared.User;
+using User = AuthorizationManagement.Api.Models.Internal.User;
+
 
 namespace AuthorizationManagement.Api.Controllers
 {
@@ -21,7 +21,7 @@ namespace AuthorizationManagement.Api.Controllers
         }
 
         // GET: api/<UsersController>
-        [ProducesResponseType(typeof(IEnumerable<UserDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<Models.User>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync([FromRoute] string applicationId)
         {
@@ -30,7 +30,7 @@ namespace AuthorizationManagement.Api.Controllers
         }
 
         // GET api/<UsersController>/5
-        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.User), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync([FromRoute] string applicationId, string id)
         {
@@ -40,12 +40,12 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(new { user.FirstName, user.LastName, user.Email, user.Id, user.Enabled });
         }
 
-        [ProducesResponseType(typeof(IEnumerable<GroupDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<Models.Group>), StatusCodes.Status200OK)]
         [HttpGet("{id}/groups")]
         public async Task<IActionResult> GetGroupsAsync([FromRoute] string applicationId, string id)
         {
             var groupIds = (await GetGroupIdsFromUserAsync(applicationId, id).ConfigureAwait(false)).ToArray();
-            if (!groupIds.Any()) return Ok(Enumerable.Empty<GroupDto>());
+            if (!groupIds.Any()) return Ok(Enumerable.Empty<Models.Group>());
 
             var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = 'Group' AND c.applicationId = @applicationId AND c.id IN ({CreateInOperatorInput(groupIds)})")
                 .WithParameter("@applicationId", applicationId);
@@ -56,21 +56,21 @@ namespace AuthorizationManagement.Api.Controllers
         }
 
         // POST api/<UsersController>
-        [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Models.User), StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] UserDto userDto)
+        public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.User userDto)
         {
             var user = new User(userDto) { ApplicationId = applicationId };
 
             await CreateAsync(user).ConfigureAwait(false);
             await IncrementUserCountAsync(applicationId).ConfigureAwait(false);
 
-            return CreatedAtAction(nameof(GetAsync), new { applicationId, id = userDto.Id }, userDto);
+            return Ok(userDto);
         }
 
         // PUT api/<UsersController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsync([FromRoute] string applicationId, string id, [FromBody] UserDto userDto)
+        public async Task<IActionResult> PutAsync([FromRoute] string applicationId, string id, [FromBody] Models.User userDto)
         {
             var user = await GetDocumentAsync(applicationId, id).ConfigureAwait(false);
             if (user == null) return NotFound();
