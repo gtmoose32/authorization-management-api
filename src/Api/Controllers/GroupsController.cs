@@ -20,7 +20,6 @@ namespace AuthorizationManagement.Api.Controllers
         {
         }
 
-        // GET: api/<UsersController>
         [ProducesResponseType(typeof(IEnumerable<Models.Group>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync([FromRoute] string applicationId)
@@ -29,7 +28,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(groups.Select(g => Mapper.Map<Models.Group>(g)).ToArray());
         }
 
-        // GET api/<UsersController>/5
         [ProducesResponseType(typeof(Models.Group), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync([FromRoute] string applicationId, string id)
@@ -55,7 +53,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(users.Select(u => Mapper.Map<Models.User>(u)).ToArray());
         }
 
-        // POST api/<UsersController>
         [ProducesResponseType(typeof(Models.Group), StatusCodes.Status200OK)]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.Group groupDto)
@@ -64,12 +61,9 @@ namespace AuthorizationManagement.Api.Controllers
             group.ApplicationId = applicationId;
 
             await CreateAsync(group).ConfigureAwait(false);
-            await IncrementGroupCountAsync(applicationId).ConfigureAwait(false);
-
             return Ok(groupDto);
         }
 
-        // PUT api/<UsersController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync([FromRoute] string applicationId, string id, [FromBody] Models.Group groupDto)
         {
@@ -84,7 +78,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(groupDto);
         }
 
-        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] string applicationId, string id)
         {
@@ -94,7 +87,7 @@ namespace AuthorizationManagement.Api.Controllers
 
             var userGroupIds = (await Container.WhereAsync<string>(query).ConfigureAwait(false)).ToArray();
             if (userGroupIds.Any())
-                return BadRequest(
+                return Conflict(
                     new
                     {
                         Error = $"Cannot delete Group with id '{id}' due to UserGroup(s) referencing this group.",
@@ -105,7 +98,7 @@ namespace AuthorizationManagement.Api.Controllers
 
             return Ok();
         }
-
+        
         private async Task<IEnumerable<string>> GetUserIdsFromGroupAsync(string applicationId, string groupId)
         {
             var query = new QueryDefinition("SELECT VALUE c.userId FROM c WHERE c.documentType = 'UserGroup' AND c.applicationId = @applicationId AND c.groupId = @groupId")

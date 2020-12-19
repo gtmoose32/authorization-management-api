@@ -54,7 +54,7 @@ namespace AuthorizationManagement.Api.Controllers
                 throw;
             }
         }
-
+        
         protected string CreateInOperatorInput(string[] values)
         {
             var sb = new StringBuilder();
@@ -70,34 +70,6 @@ namespace AuthorizationManagement.Api.Controllers
             }
 
             return sb.ToString();
-        }
-
-        protected Task IncrementUserCountAsync(string applicationId) => IncrementCountAsync(applicationId, DocumentType.User);
-
-        protected Task IncrementGroupCountAsync(string applicationId) => IncrementCountAsync(applicationId, DocumentType.Group);
-
-        private async Task IncrementCountAsync(string applicationId, DocumentType documentType)
-        {
-            var response = await Container.ReadItemAsync<Application>(applicationId, new PartitionKey(applicationId))
-                .ConfigureAwait(false);
-
-            var app = response.Resource;
-            switch (documentType)
-            {
-                case DocumentType.User:
-                    app.UserCount++;
-                    break;
-                case DocumentType.Group:
-                    app.GroupCount++;
-                    break;
-                case DocumentType.Unknown:
-                case DocumentType.Application:
-                case DocumentType.UserGroup:
-                    return;
-            }
-
-            await Container.ReplaceItemAsync(app, applicationId, new PartitionKey(applicationId), new ItemRequestOptions { IfMatchEtag = app.ETag })
-                .ConfigureAwait(false);
         }
     }
 }

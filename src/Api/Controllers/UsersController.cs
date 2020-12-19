@@ -21,7 +21,6 @@ namespace AuthorizationManagement.Api.Controllers
         {
         }
 
-        // GET: api/<UsersController>
         [ProducesResponseType(typeof(IEnumerable<Models.User>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync([FromRoute] string applicationId)
@@ -30,7 +29,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(users.Select(u => Mapper.Map<Models.User>(u)).ToArray());
         }
 
-        // GET api/<UsersController>/5
         [ProducesResponseType(typeof(Models.User), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync([FromRoute] string applicationId, string id)
@@ -56,7 +54,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(groups.Select(g => Mapper.Map<Models.Group>(g)).ToArray());
         }
 
-        // POST api/<UsersController>
         [ProducesResponseType(typeof(Models.User), StatusCodes.Status200OK)]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.User userDto)
@@ -65,12 +62,10 @@ namespace AuthorizationManagement.Api.Controllers
             user.ApplicationId = applicationId;
             
             await CreateAsync(user).ConfigureAwait(false);
-            await IncrementUserCountAsync(applicationId).ConfigureAwait(false);
 
             return Ok(userDto);
         }
 
-        // PUT api/<UsersController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync([FromRoute] string applicationId, string id, [FromBody] Models.User userDto)
         {
@@ -85,7 +80,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok();
         }
 
-        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] string applicationId, string id)
         {
