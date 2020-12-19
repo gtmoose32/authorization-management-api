@@ -77,7 +77,7 @@ namespace AuthorizationManagement.Api.Controllers
             await Container.ReplaceItemAsync(user, id, new PartitionKey(applicationId), new ItemRequestOptions { IfMatchEtag = user.ETag })
                 .ConfigureAwait(false);
 
-            return Ok();
+            return Ok(userDto);
         }
 
         [HttpDelete("{id}")]
@@ -89,21 +89,19 @@ namespace AuthorizationManagement.Api.Controllers
 
 
             var userGroupIds = (await Container.WhereAsync<string>(query).ConfigureAwait(false)).ToArray();
-            if (userGroupIds.Any())
-                return BadRequest(
-                    new
-                    {
-                        Error = $"Cannot delete Group with id '{id}' due to UserGroup(s) referencing this group.",
-                        ReferencingGroups = userGroupIds
-                    });
-
-            var batch = Container.CreateTransactionalBatch(new PartitionKey(applicationId))
-                .DeleteItem(id);
-
-            foreach (var userGroupId in userGroupIds)
+            if (!userGroupIds.Any())
+            {
+                await Container.DeleteItemAsync<User>(id, new PartitionKey(applicationId)).ConfigureAwait(false);
+                return Ok();
+            }
+            
+            var batch = Container.CreateTransactionalBatch(new PartitionKey(applicationId));
+            foreach (var userGroupId in userGroupIds) //delete user groups
             {
                 batch.DeleteItem(userGroupId);
             }
+
+            batch.DeleteItem(id); //delete user
 
             await batch.ExecuteAsync().ConfigureAwait(false);
 
