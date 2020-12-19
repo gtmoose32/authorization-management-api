@@ -6,17 +6,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using NSubstitute.ExceptionExtensions;
+// ReSharper disable PossibleNullReferenceException
 
 namespace AuthorizationManagement.Api.Tests.Controllers
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
-    public class ApplicationsControllerTests : ControllerTestBase<Application>
+    public class ApplicationsControllerTests : ControllerTestBase
     {
         private ApplicationsController _sut;
         

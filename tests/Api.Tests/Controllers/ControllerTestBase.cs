@@ -15,8 +15,7 @@ using System.Threading;
 namespace AuthorizationManagement.Api.Tests.Controllers
 {
     [ExcludeFromCodeCoverage]
-    public abstract class ControllerTestBase<T>
-        where T : class, IDocument
+    public abstract class ControllerTestBase
     {
         protected Container Container { get; }
         protected IFixture Fixture { get; }
@@ -29,7 +28,8 @@ namespace AuthorizationManagement.Api.Tests.Controllers
             Mapper = Substitute.For<IMapper>();
         }
         
-        protected static FeedIterator<T> CreateFeedIteratorWithResponse(IEnumerable<T> results)
+        protected static FeedIterator<T> CreateFeedIteratorWithResponse<T>(IEnumerable<T> results)
+            where T : class
         {
             var feedIterator = Substitute.For<FeedIterator<T>>();
             feedIterator.HasMoreResults.Returns(true, false);
@@ -42,7 +42,8 @@ namespace AuthorizationManagement.Api.Tests.Controllers
             return feedIterator;
         }
         
-        protected static ItemResponse<T> CreateItemResponse(HttpStatusCode statusCode, T item, Headers headers = null)
+        protected static ItemResponse<T> CreateItemResponse<T>(HttpStatusCode statusCode, T item, Headers headers = null)
+            where T : class, IDocument
         {
             var args = new object[] { statusCode, headers, item, null };
 
