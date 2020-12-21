@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Threading.Tasks;
+using AuthorizationManagement.Api.Extensions;
 
 namespace AuthorizationManagement.Api.Controllers
 {

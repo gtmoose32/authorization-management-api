@@ -6,6 +6,7 @@ using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AuthorizationManagement.Api.Extensions;
 using User = AuthorizationManagement.Api.Models.Internal.User;
 
 namespace AuthorizationManagement.Api.Controllers
