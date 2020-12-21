@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -5,10 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
-using AutoMapper;
+using System.Diagnostics.CodeAnalysis;
+using AuthorizationManagement.Api.Extensions;
 
 namespace AuthorizationManagement.Api
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -24,7 +27,7 @@ namespace AuthorizationManagement.Api
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                const string ApiKey = "API Key";
+                const string apiKey = "API Key";
                 var scheme = new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.ApiKey,
@@ -33,7 +36,7 @@ namespace AuthorizationManagement.Api
                 };
 
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthorizationManagement.Api", Version = "v1" });
-                c.AddSecurityDefinition(ApiKey, scheme);
+                c.AddSecurityDefinition(apiKey, scheme);
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement {{ scheme, new List<string>() }});
             });
 
@@ -44,7 +47,7 @@ namespace AuthorizationManagement.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsLocal() || env.IsDevelopment())
+            if (!env.IsStaging() && !env.IsProduction())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
