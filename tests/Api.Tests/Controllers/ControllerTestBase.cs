@@ -17,6 +17,7 @@ namespace AuthorizationManagement.Api.Tests.Controllers
     [ExcludeFromCodeCoverage]
     public abstract class ControllerTestBase
     {
+        protected string ApplicationId { get; }
         protected Container Container { get; }
         protected IFixture Fixture { get; }
         protected IMapper Mapper { get; }
@@ -26,6 +27,7 @@ namespace AuthorizationManagement.Api.Tests.Controllers
             Container = Substitute.For<Container>();
             Fixture = new Fixture();
             Mapper = Substitute.For<IMapper>();
+            ApplicationId = Fixture.Create<string>();
         }
         
         protected static FeedIterator<T> CreateFeedIteratorWithResponse<T>(IEnumerable<T> results)

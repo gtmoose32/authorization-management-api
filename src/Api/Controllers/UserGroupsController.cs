@@ -29,7 +29,7 @@ namespace AuthorizationManagement.Api.Controllers
                 .WithParameter("@groupId", userGroupDto.GroupId);
 
             var userGroup = await Container.SingleOrDefaultAsync<UserGroup>(query).ConfigureAwait(false);
-            if (userGroup != null) return Ok(userGroup);
+            if (userGroup != null) return Ok(Mapper.Map<Models.UserGroup>(userGroup));
 
             userGroup = Mapper.Map<UserGroup>(userGroupDto);
             userGroup.ApplicationId = applicationId;

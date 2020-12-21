@@ -21,8 +21,6 @@ namespace AuthorizationManagement.Api.Tests.Controllers
     [TestClass]
     public class UsersControllerTests : ControllerTestBase
     {
-        private const string ApplicationId = "2321";
-        
         private UsersController _sut;
         
         [TestInitialize]

@@ -21,8 +21,6 @@ namespace AuthorizationManagement.Api.Tests.Controllers
     [TestClass]
     public class GroupsControllerTests : ControllerTestBase
     {
-        private const string ApplicationId = "2321";
-        
         private GroupsController _sut;
         
         [TestInitialize]
