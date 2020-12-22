@@ -1,4 +1,5 @@
-﻿using AuthorizationManagement.Api.Models.Internal;
+﻿using AuthorizationManagement.Api.Extensions;
+using AuthorizationManagement.Api.Models.Internal;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -6,7 +7,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using AuthorizationManagement.Api.Extensions;
 
 namespace AuthorizationManagement.Api.Controllers
 {
@@ -55,7 +55,10 @@ namespace AuthorizationManagement.Api.Controllers
                 throw;
             }
         }
-        
+
+        protected virtual Task UpdateDocumentAsync(T document) =>
+            Container.ReplaceItemAsync(document, document.Id, new PartitionKey(document.ApplicationId), new ItemRequestOptions {IfMatchEtag = document.ETag});
+
         protected string CreateInOperatorInput(string[] values)
         {
             var sb = new StringBuilder();

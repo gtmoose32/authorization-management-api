@@ -1,10 +1,10 @@
-﻿using AuthorizationManagement.Api.Models.Internal;
+﻿using AuthorizationManagement.Api.Extensions;
+using AuthorizationManagement.Api.Models.Internal;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Threading.Tasks;
-using AuthorizationManagement.Api.Extensions;
 
 namespace AuthorizationManagement.Api.Controllers
 {
@@ -18,7 +18,6 @@ namespace AuthorizationManagement.Api.Controllers
         {
         }
 
-        // POST api/<UsersController>
         [ProducesResponseType(typeof(Models.UserGroup), StatusCodes.Status200OK)]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute]string applicationId, [FromBody]Models.UserGroup userGroupDto)
@@ -39,7 +38,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(Mapper.Map<Models.UserGroup>(userGroup));
         }
 
-        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync([FromRoute]string applicationId, string id)
         {

@@ -3,15 +3,17 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
-namespace AuthorizationManagement.Api.Controllers
+namespace AuthorizationManagement.Api
 {
+    [ExcludeFromCodeCoverage]
     [AttributeUsage(AttributeTargets.Class)]
     public class ApiKeyAttribute : Attribute, IAsyncActionFilter
     {
         private const string ApiKeyName = "X-API-Key";
-        private const string ApiKeyConfigKey = "SemaphoreApiKey";
+        private const string ApiKeyConfigKey = "AuthorizationManagementApiKey";
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
@@ -20,7 +22,7 @@ namespace AuthorizationManagement.Api.Controllers
                 context.Result = new ContentResult()
                 {
                     StatusCode = 401,
-                    Content = "Api Key was not provided"
+                    Content = "API key was not provided"
                 };
                 return;
             }
@@ -33,7 +35,7 @@ namespace AuthorizationManagement.Api.Controllers
                 context.Result = new ContentResult()
                 {
                     StatusCode = 401,
-                    Content = "Api Key is not valid"
+                    Content = "API key is not valid"
                 };
 
                 return;

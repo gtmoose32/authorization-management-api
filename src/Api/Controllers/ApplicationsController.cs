@@ -1,4 +1,5 @@
-﻿using AuthorizationManagement.Api.Models.Internal;
+﻿using AuthorizationManagement.Api.Extensions;
+using AuthorizationManagement.Api.Models.Internal;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,6 @@ using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AuthorizationManagement.Api.Extensions;
 
 namespace AuthorizationManagement.Api.Controllers
 {
@@ -20,7 +20,6 @@ namespace AuthorizationManagement.Api.Controllers
         {
         }
         
-        // GET: api/<ApplicationsController>
         [ProducesResponseType(typeof(IEnumerable<Models.Application>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
@@ -32,7 +31,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(apps.Select(a => Mapper.Map<Models.Application>(a)).ToArray());
         }
         
-        // GET api/<ApplicationsController>/5
         [ProducesResponseType(typeof(Models.Application), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(string id)
@@ -43,7 +41,6 @@ namespace AuthorizationManagement.Api.Controllers
             return Ok(Mapper.Map<Models.Application>(app));
         }
 
-        // POST api/<ApplicationsController>
         [ProducesResponseType(typeof(Models.Application), StatusCodes.Status200OK)]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] Models.Application appDto)

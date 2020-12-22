@@ -1,4 +1,5 @@
-﻿using AuthorizationManagement.Api.Models.Internal;
+﻿using AuthorizationManagement.Api.Extensions;
+using AuthorizationManagement.Api.Models.Internal;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,6 @@ using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AuthorizationManagement.Api.Extensions;
 using User = AuthorizationManagement.Api.Models.Internal.User;
 
 namespace AuthorizationManagement.Api.Controllers
@@ -73,8 +73,7 @@ namespace AuthorizationManagement.Api.Controllers
 
             group.Name = groupDto.Name;
 
-            await Container.ReplaceItemAsync(group, id, new PartitionKey(applicationId), new ItemRequestOptions { IfMatchEtag = group.ETag })
-                .ConfigureAwait(false);
+            await UpdateDocumentAsync(group).ConfigureAwait(false);
 
             return Ok(groupDto);
         }
