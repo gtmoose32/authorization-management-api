@@ -14,15 +14,15 @@ namespace AuthorizationManagement.Api.Extensions
                 throw new InvalidOperationException("Could not obtain a connection string from configuration.");
 
             var builder = new CosmosClientBuilder(connectionString)
-                    .WithSerializerOptions(new CosmosSerializationOptions { PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase })
-                    .WithConnectionMode(config["CosmosDb:ConnectionMode"]);
+                .WithSerializerOptions(new CosmosSerializationOptions { PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase })
+                .WithConnectionMode(config["CosmosDb:ConnectionMode"]);
 
             var regions = config.GetSection("CosmosDb:PreferredRegions").Get<string[]>();
             if (regions?.Length > 0)
                 builder = builder.WithApplicationPreferredRegions(regions);
 
             services.AddSingleton(builder.Build());
-            
+
             return services.AddSingleton(provider =>
                 provider.GetRequiredService<CosmosClient>()
                     .GetContainer(config["CosmosDb:DatabaseId"], config["CosmosDb:ContainerId"]));
@@ -32,7 +32,7 @@ namespace AuthorizationManagement.Api.Extensions
         {
             connectionString = config["CosmosDb:ConnectionString"];
             if (!string.IsNullOrWhiteSpace(connectionString)) return true;
-            
+
             var connectionStringPath = config["CosmosDb:ConnectionStringConfigKeyPath"];
             if (string.IsNullOrWhiteSpace(connectionStringPath)) return false;
 

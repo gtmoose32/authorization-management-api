@@ -8,6 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+
+// ReSharper disable PossibleNullReferenceException
 
 namespace AuthorizationManagement.Api.Tests.Extensions
 {
@@ -48,6 +51,32 @@ namespace AuthorizationManagement.Api.Tests.Extensions
         }
 
         [TestMethod]
+        public void AddCosmosDb_ConnectionMode_Test()
+        {
+            //Arrange
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(
+                    new Dictionary<string, string>
+                    {
+                        {"CosmosDb:ConnectionString", "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="},
+                        {"CosmosDb:DatabaseId", "db"},
+                        {"CosmosDb:ContainerId", "col"},
+                        {"CosmosDb:ConnectionMode", "Gateway"}
+                    })
+                .Build();
+
+            _services.AddCosmosDb(config);
+            var provider = _services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
+
+            //Act
+            var result = provider.GetService<CosmosClient>();
+
+            //Assert
+            result.Should().NotBeNull();
+            result.ClientOptions.ConnectionMode.Should().Be(ConnectionMode.Gateway);
+        }
+        
+        [TestMethod]
         public void AddCosmosDb_AlternateConnectionStringConfig_Test()
         {
             //Arrange
@@ -56,7 +85,7 @@ namespace AuthorizationManagement.Api.Tests.Extensions
                     new Dictionary<string, string>
                     {
                         {"CosmosDb:ConnectionStringConfigKeyPath", "Other:CosmosB:Config:Connection" },
-                        {"Other:CosmosB:Config:Connection", "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="},
+                        {"Other:CosmosB:Config:Connection", "AccountEndpoint=https://unitest.com:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="},
                         {"CosmosDb:DatabaseId", "db"},
                         {"CosmosDb:ContainerId", "col"}
                     })
@@ -66,10 +95,11 @@ namespace AuthorizationManagement.Api.Tests.Extensions
             var provider = _services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
 
             //Act
-            var result = provider.GetService<Container>();
+            var result = provider.GetService<CosmosClient>();
 
             //Assert
             result.Should().NotBeNull();
+            result.Endpoint.Should().Be(new Uri("https://unitest.com:8081/"));
         }
 
         [TestMethod]
@@ -109,10 +139,18 @@ namespace AuthorizationManagement.Api.Tests.Extensions
             var provider = _services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
 
             //Act
-            var result = provider.GetService<Container>();
+            var result = provider.GetService<CosmosClient>();
 
             //Assert
             result.Should().NotBeNull();
+            result.ClientOptions.ApplicationPreferredRegions.Should().NotBeNullOrEmpty();
+            result.ClientOptions.ApplicationPreferredRegions
+                .Any(r => r.Equals("North Central US"))
+                .Should().BeTrue();
+            
+            result.ClientOptions.ApplicationPreferredRegions
+                .Any(r => r.Equals("East US"))
+                .Should().BeTrue();
         }
     }
 }
