@@ -121,13 +121,5 @@ namespace AuthorizationManagement.Api.Tests.Controllers
                 .DeleteItemAsync<UserGroup>(Arg.Is(id), Arg.Any<PartitionKey>())
                 .ConfigureAwait(false);
         }
-        
-        //// DELETE api/<UsersController>/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteAsync([FromRoute]string applicationId, string id)
-        //{
-        //    await Container.DeleteItemAsync<UserGroup>(id, new PartitionKey(applicationId)).ConfigureAwait(false);
-        //    return Ok();
-        //}
     }
 }
