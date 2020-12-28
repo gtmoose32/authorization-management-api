@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace AuthorizationManagement.Api.Models.Internal
 {
     [ExcludeFromCodeCoverage]
-    public class User : Models.User, IDocument
+    public class User : Models.UserInfo, IDocument
     {
         [JsonProperty("applicationId")]
         public string ApplicationId { get; set; }
