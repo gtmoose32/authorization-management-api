@@ -5,7 +5,6 @@
         Unknown,
         Application,
         User,
-        Group,
-        UserGroup
+        Group
     }
 }

@@ -15,11 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "src\Api\Api.csproj", "{9E43B6CB-B89C-408B-AB94-880169358F75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Models", "src\Api.Models\Api.Models.csproj", "{05370E9A-D545-4821-A898-E8D696ABAE54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Models", "src\Api.Models\Api.Models.csproj", "{05370E9A-D545-4821-A898-E8D696ABAE54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Models.Internal", "src\Api.Models.Internal\Api.Models.Internal.csproj", "{C20BE7DD-BEC6-4BAC-B500-92C9126AAF98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Models.Internal", "src\Api.Models.Internal\Api.Models.Internal.csproj", "{C20BE7DD-BEC6-4BAC-B500-92C9126AAF98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Tests", "tests\Api.Tests\Api.Tests.csproj", "{08E4554E-AD83-490B-9685-F07C303FFFF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Tests", "tests\Api.Tests\Api.Tests.csproj", "{08E4554E-AD83-490B-9685-F07C303FFFF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
