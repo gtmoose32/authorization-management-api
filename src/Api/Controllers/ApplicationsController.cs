@@ -45,7 +45,7 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] Models.Application appDto)
         {
-            var app = await CreateAsync(Mapper.Map<Application>(appDto)).ConfigureAwait(false);
+            var app = await CreateDocumentAsync(Mapper.Map<Application>(appDto)).ConfigureAwait(false);
             return Ok(Mapper.Map<Models.Application>(app));
         }
     }

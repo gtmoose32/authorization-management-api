@@ -52,10 +52,13 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.User userDto)
         {
+            if (!(await ApplicationExistsAsync(applicationId).ConfigureAwait(false)))
+                return NotFound();
+
             var user = Mapper.Map<User>(userDto);
             user.ApplicationId = applicationId;
             
-            await CreateAsync(user).ConfigureAwait(false);
+            await CreateDocumentAsync(user).ConfigureAwait(false);
 
             return Ok(userDto);
         }

@@ -58,10 +58,13 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.Group groupDto)
         {
+            if (!(await ApplicationExistsAsync(applicationId).ConfigureAwait(false)))
+                return NotFound();
+
             var group = Mapper.Map<Group>(groupDto);
             group.ApplicationId = applicationId;
 
-            await CreateAsync(group).ConfigureAwait(false);
+            await CreateDocumentAsync(group).ConfigureAwait(false);
             return Ok(groupDto);
         }
 
