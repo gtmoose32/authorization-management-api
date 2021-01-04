@@ -46,7 +46,7 @@ namespace AuthorizationManagement.Api.Controllers
             var userIds = (await GetUserIdsFromGroupAsync(applicationId, id).ConfigureAwait(false)).ToArray();
             if (!userIds.Any()) return Ok(Enumerable.Empty<Models.User>());
 
-            var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = 'User' AND c.applicationId = @applicationId AND c.id IN ({CreateInOperatorInput(userIds)})")
+            var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = '{DocumentType.User}' AND c.applicationId = @applicationId AND c.id IN ({CreateInOperatorInput(userIds)})")
                 .WithParameter("@applicationId", applicationId);
 
             var users = await Container.WhereAsync<User>(query).ConfigureAwait(false);
@@ -84,10 +84,6 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] string applicationId, string id)
         {
-            var query = new QueryDefinition($"SELECT value c.id FROM c JOIN c.groups g WHERE c.documentType = '{DocumentType.User}' AND c.applicationId = @applicationId AND g.groupId = @groupId")
-                .WithParameter("@applicationId", applicationId)
-                .WithParameter("@groupId", id);
-
             var userIds = (await GetUserIdsFromGroupAsync(applicationId, id)).ToArray();
             if (userIds.Any())
                 return Conflict(
@@ -104,7 +100,7 @@ namespace AuthorizationManagement.Api.Controllers
 
         private async Task<IEnumerable<string>> GetUserIdsFromGroupAsync(string applicationId, string groupId)
         {
-            var query = new QueryDefinition($"SELECT value c.id FROM c JOIN c.groups g WHERE c.documentType = '{DocumentType.User}' AND c.applicationId = @applicationId AND g.groupId = @groupId")
+            var query = new QueryDefinition($"SELECT value c.id FROM c WHERE c.documentType = '{DocumentType.User}' AND c.applicationId = @applicationId AND  ARRAY_CONTAINS(c.groups, @groupId)")
                 .WithParameter("@applicationId", applicationId)
                 .WithParameter("@groupId", groupId);
 
