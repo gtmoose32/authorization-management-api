@@ -40,7 +40,7 @@ namespace AuthorizationManagement.Api.Controllers
             var response = Mapper.Map<Models.User>(user);
             
             var query = new QueryDefinition(
-                $"SELECT * FROM c WHERE c.documentType = '{DocumentType.Group} AND c.id IN ({CreateInOperatorInput(user.Groups.ToArray())})");
+                $"SELECT * FROM c WHERE c.documentType = '{DocumentType.Group}' AND c.id IN ({CreateInOperatorInput(user.Groups.ToArray())})");
 
             var groups = await Container.WhereAsync<Group>(query).ConfigureAwait(false);
             response.Groups = groups.Select(g => Mapper.Map<Models.Group>(g)).ToList();
