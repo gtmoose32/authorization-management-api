@@ -1,0 +1,8 @@
+{
+  "CosmosDb": {
+    "PreferredRegions": [
+      "North Central US",
+      "East US"
+    ]
+  } 
+}

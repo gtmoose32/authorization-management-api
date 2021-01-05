@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json;
-using System;
+using System.Diagnostics.CodeAnalysis;
 
-namespace AuthorizationManagement.Shared.Dto
+namespace AuthorizationManagement.Api.Models
 {
-    public class UserDto
+    [ExcludeFromCodeCoverage]
+    public class UserInfo : ModelBase
     {
-        [JsonProperty("id")]
-        public string Id { get; set; } = Guid.NewGuid().ToString();
-
         [JsonProperty("firstName")]
         public string FirstName { get; set; }
 
@@ -19,6 +17,5 @@ namespace AuthorizationManagement.Shared.Dto
 
         [JsonProperty("enabled")]
         public bool Enabled { get; set; }
-        
     }
 }

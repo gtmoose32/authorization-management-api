@@ -1,4 +1,6 @@
-﻿using AuthorizationManagement.Shared;
+﻿using AuthorizationManagement.Api.Extensions;
+using AuthorizationManagement.Api.Models.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
@@ -12,18 +14,35 @@ namespace AuthorizationManagement.Api.Controllers
         where T : class, IDocument
     {
         protected Container Container { get; }
+        
+        protected IMapper Mapper { get; }
+        
         protected DocumentType DocumentType { get; }
 
-        protected ContainerControllerBase(Container container, DocumentType documentType)
+        protected ContainerControllerBase(Container container, IMapper mapper, DocumentType documentType)
         {
             Container = container;
+            Mapper = mapper;
             DocumentType = documentType;
         }
 
-        protected virtual async Task<T> CreateAsync(T document) =>
+        protected async Task<bool> ApplicationExistsAsync(string id)
+        {
+            try
+            {
+                await Container.ReadItemAsync<Application>(id, new PartitionKey(id)).ConfigureAwait(false);
+                return true;
+            }
+            catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+        }
+
+        protected async Task<T> CreateDocumentAsync(T document) =>
             (await Container.CreateItemAsync(document, new PartitionKey(document.ApplicationId)).ConfigureAwait(false)).Resource;
 
-        protected virtual async Task<IEnumerable<T>> GetDocumentsAsync(string partitionKey, int itemCount = 1000)
+        protected async Task<IEnumerable<T>> GetDocumentsAsync(string partitionKey, int itemCount = 1000)
         {
             var query = new QueryDefinition($"SELECT * FROM c WHERE c.applicationId = @applicationId AND c.documentType = '{DocumentType}'")
                 .WithParameter("@applicationId", partitionKey);
@@ -33,7 +52,7 @@ namespace AuthorizationManagement.Api.Controllers
             return await Container.WhereAsync<T>(query, options).ConfigureAwait(false);
         }
 
-        protected virtual async Task<T> GetDocumentAsync(string applicationId, string id)
+        protected async Task<T> GetDocumentAsync(string applicationId, string id)
         {
             try
             {
@@ -42,14 +61,14 @@ namespace AuthorizationManagement.Api.Controllers
 
                 return response.Resource;
             }
-            catch (CosmosException exception)
+            catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
             {
-                if (exception.StatusCode == HttpStatusCode.NotFound)
-                    return null;
-
-                throw;
+                return null;
             }
         }
+
+        protected Task UpdateDocumentAsync(T document) =>
+            Container.ReplaceItemAsync(document, document.Id, new PartitionKey(document.ApplicationId), new ItemRequestOptions {IfMatchEtag = document.ETag});
 
         protected string CreateInOperatorInput(string[] values)
         {
@@ -66,34 +85,6 @@ namespace AuthorizationManagement.Api.Controllers
             }
 
             return sb.ToString();
-        }
-
-        protected Task IncrementUserCountAsync(string applicationId) => IncrementCountAsync(applicationId, DocumentType.User);
-
-        protected Task IncrementGroupCountAsync(string applicationId) => IncrementCountAsync(applicationId, DocumentType.Group);
-
-        private async Task IncrementCountAsync(string applicationId, DocumentType documentType)
-        {
-            var response = await Container.ReadItemAsync<Application>(applicationId, new PartitionKey(applicationId))
-                .ConfigureAwait(false);
-
-            var app = response.Resource;
-            switch (documentType)
-            {
-                case DocumentType.User:
-                    app.UserCount++;
-                    break;
-                case DocumentType.Group:
-                    app.GroupCount++;
-                    break;
-                case DocumentType.Unknown:
-                case DocumentType.Application:
-                case DocumentType.UserGroup:
-                    return;
-            }
-
-            await Container.ReplaceItemAsync(app, applicationId, new PartitionKey(applicationId), new ItemRequestOptions { IfMatchEtag = app.ETag })
-                .ConfigureAwait(false);
         }
     }
 }

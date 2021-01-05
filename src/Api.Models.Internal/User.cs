@@ -1,28 +1,14 @@
-﻿using AuthorizationManagement.Shared.Dto;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace AuthorizationManagement.Shared
+namespace AuthorizationManagement.Api.Models.Internal
 {
-    public class User : UserDto, IDocument
+    [ExcludeFromCodeCoverage]
+    public class User : Models.UserInfo, IDocument
     {
-        #region ctor
-        public User()
-        {
-
-        }
-
-        public User(UserDto user)
-        {
-            Id = user.Id;
-            Email = user.Email;
-            Enabled = user.Enabled;
-            FirstName = user.FirstName;
-            LastName = user.LastName;
-        }
-        #endregion
-
         [JsonProperty("applicationId")]
         public string ApplicationId { get; set; }
 
@@ -30,6 +16,9 @@ namespace AuthorizationManagement.Shared
         [JsonProperty("documentType")]
         public DocumentType DocumentType => DocumentType.User;
 
+        [JsonProperty(PropertyName = "groups")]
+        public IList<string> Groups { get; set; } = new List<string>();
+        
         [JsonConverter(typeof(UnixDateTimeConverter))]
         [JsonProperty(PropertyName = "_ts")]
         public DateTime LastModifiedOn { get; private set; } = DateTime.UtcNow;

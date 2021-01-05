@@ -1,12 +1,14 @@
-﻿using AuthorizationManagement.Shared;
-using AuthorizationManagement.Shared.Dto;
+﻿using AuthorizationManagement.Api.Extensions;
+using AuthorizationManagement.Api.Models.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using User = AuthorizationManagement.Shared.User;
+using User = AuthorizationManagement.Api.Models.Internal.User;
+
 
 namespace AuthorizationManagement.Api.Controllers
 {
@@ -15,115 +17,71 @@ namespace AuthorizationManagement.Api.Controllers
     [ApiController]
     public class UsersController : ContainerControllerBase<User>
     {
-        public UsersController(Container container)
-            : base(container, DocumentType.User)
+        public UsersController(Container container, IMapper mapper)
+            : base(container, mapper, DocumentType.User)
         {
         }
 
-        // GET: api/<UsersController>
-        [ProducesResponseType(typeof(IEnumerable<UserDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<Models.UserInfo>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync([FromRoute] string applicationId)
         {
             var users = await GetDocumentsAsync(applicationId).ConfigureAwait(false);
-            return Ok(users.Select(u => new { u.Email, u.Id, u.FirstName, u.LastName, u.Enabled }));
+            return Ok(users.Select(u => Mapper.Map<Models.UserInfo>(u)).ToArray());
         }
 
-        // GET api/<UsersController>/5
-        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.User), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync([FromRoute] string applicationId, string id)
         {
             var user = await GetDocumentAsync(applicationId, id).ConfigureAwait(false);
             if (user == null) return NotFound();
 
-            return Ok(new { user.FirstName, user.LastName, user.Email, user.Id, user.Enabled });
-        }
-
-        [ProducesResponseType(typeof(IEnumerable<GroupDto>), StatusCodes.Status200OK)]
-        [HttpGet("{id}/groups")]
-        public async Task<IActionResult> GetGroupsAsync([FromRoute] string applicationId, string id)
-        {
-            var groupIds = (await GetGroupIdsFromUserAsync(applicationId, id).ConfigureAwait(false)).ToArray();
-            if (!groupIds.Any()) return Ok(Enumerable.Empty<GroupDto>());
-
-            var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = 'Group' AND c.applicationId = @applicationId AND c.id IN ({CreateInOperatorInput(groupIds)})")
-                .WithParameter("@applicationId", applicationId);
+            var response = Mapper.Map<Models.User>(user);
+            
+            var query = new QueryDefinition(
+                $"SELECT * FROM c WHERE c.documentType = '{DocumentType.Group}' AND c.id IN ({CreateInOperatorInput(user.Groups.ToArray())})");
 
             var groups = await Container.WhereAsync<Group>(query).ConfigureAwait(false);
-
-            return Ok(groups.Select(g => new { g.Id, g.Name }));
+            response.Groups = groups.Select(g => Mapper.Map<Models.Group>(g)).ToList();
+            
+            return Ok(response);
         }
 
-        // POST api/<UsersController>
-        [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Models.User), StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] UserDto userDto)
+        public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.User userDto)
         {
-            var user = new User(userDto) { ApplicationId = applicationId };
+            if (!(await ApplicationExistsAsync(applicationId).ConfigureAwait(false)))
+                return NotFound();
 
-            await CreateAsync(user).ConfigureAwait(false);
-            await IncrementUserCountAsync(applicationId).ConfigureAwait(false);
+            var user = Mapper.Map<User>(userDto);
+            user.ApplicationId = applicationId;
+            
+            await CreateDocumentAsync(user).ConfigureAwait(false);
 
-            return CreatedAtAction(nameof(GetAsync), new { applicationId, id = userDto.Id }, userDto);
+            return Ok(userDto);
         }
 
-        // PUT api/<UsersController>/5
+        [ProducesResponseType(typeof(Models.User), StatusCodes.Status200OK)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsync([FromRoute] string applicationId, string id, [FromBody] UserDto userDto)
+        public async Task<IActionResult> PutAsync([FromRoute] string applicationId, string id, [FromBody] Models.User userDto)
         {
             var user = await GetDocumentAsync(applicationId, id).ConfigureAwait(false);
             if (user == null) return NotFound();
 
-            user.Email = userDto.Email;
-            user.FirstName = userDto.FirstName;
-            user.LastName = userDto.LastName;
-            user.Enabled = userDto.Enabled;
+            user = Mapper.Map(userDto, user);
 
-            await Container.ReplaceItemAsync(user, id, new PartitionKey(applicationId), new ItemRequestOptions { IfMatchEtag = user.ETag })
-                .ConfigureAwait(false);
+            await UpdateDocumentAsync(user).ConfigureAwait(false);
 
-            return Ok();
+            return Ok(userDto);
         }
 
-        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] string applicationId, string id)
         {
-            var query = new QueryDefinition($"SELECT value c.id FROM c WHERE c.documentType = '{DocumentType.UserGroup}' AND c.applicationId = @applicationId AND c.userId = @userId")
-                .WithParameter("@applicationId", applicationId)
-                .WithParameter("@userId", id);
-
-
-            var userGroupIds = (await Container.WhereAsync<string>(query).ConfigureAwait(false)).ToArray();
-            if (userGroupIds.Any())
-                return BadRequest(
-                    new
-                    {
-                        Error = $"Cannot delete Group with id '{id}' due to UserGroup(s) referencing this group.",
-                        ReferencingGroups = userGroupIds
-                    });
-
-            var batch = Container.CreateTransactionalBatch(new PartitionKey(applicationId))
-                .DeleteItem(id);
-
-            foreach (var userGroupId in userGroupIds)
-            {
-                batch.DeleteItem(userGroupId);
-            }
-
-            await batch.ExecuteAsync().ConfigureAwait(false);
-
+            await Container.DeleteItemAsync<User>(id, new PartitionKey(applicationId)).ConfigureAwait(false);
             return Ok();
-        }
-
-        private async Task<IEnumerable<string>> GetGroupIdsFromUserAsync(string applicationId, string userId)
-        {
-            var query = new QueryDefinition("SELECT VALUE c.groupId FROM c WHERE c.documentType = 'UserGroup' AND c.applicationId = @applicationId AND c.userId = @userId")
-                .WithParameter("@applicationId", applicationId)
-                .WithParameter("@userId", userId);
-
-            return await Container.WhereAsync<string>(query).ConfigureAwait(false);
         }
     }
 }

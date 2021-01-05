@@ -1,29 +1,19 @@
-﻿using AuthorizationManagement.Shared.Dto;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
-namespace AuthorizationManagement.Shared
+namespace AuthorizationManagement.Api.Models.Internal
 {
-    public class Application : ApplicationDto, IDocument
+    [ExcludeFromCodeCoverage]
+    public class Group : Models.Group, IDocument
     {
-        #region ctor
-        public Application()
-        {
-        }
-
-        public Application(ApplicationDto appDto)
-        {
-            Name = appDto.Name;
-        } 
-        #endregion
-
         [JsonProperty("applicationId")]
-        public string ApplicationId => Id;
+        public string ApplicationId { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("documentType")]
-        public DocumentType DocumentType => DocumentType.Application;
+        public DocumentType DocumentType => DocumentType.Group;
 
         [JsonConverter(typeof(UnixDateTimeConverter))]
         [JsonProperty(PropertyName = "_ts")]
@@ -31,6 +21,5 @@ namespace AuthorizationManagement.Shared
 
         [JsonProperty(PropertyName = "_etag")]
         public string ETag { get; private set; }
-
     }
 }

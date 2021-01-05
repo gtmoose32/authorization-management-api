@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -5,9 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using AuthorizationManagement.Api.Extensions;
 
 namespace AuthorizationManagement.Api
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -23,7 +27,7 @@ namespace AuthorizationManagement.Api
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                const string ApiKey = "API Key";
+                const string apiKey = "API Key";
                 var scheme = new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.ApiKey,
@@ -31,22 +35,23 @@ namespace AuthorizationManagement.Api
                     Name = "X-API-Key",
                 };
 
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Semaphore.Api", Version = "v1" });
-                c.AddSecurityDefinition(ApiKey, scheme);
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthorizationManagement.Api", Version = "v1" });
+                c.AddSecurityDefinition(apiKey, scheme);
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement {{ scheme, new List<string>() }});
             });
 
+            services.AddAutoMapper(cfg => cfg.AddProfile(new MappingProfile()));
             services.AddCosmosDb(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsLocal() || env.IsDevelopment())
+            if (!env.IsStaging() && !env.IsProduction())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Semaphore.Api v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthorizationManagement.Api v1"));
             }
 
             app.UseHttpsRedirection();

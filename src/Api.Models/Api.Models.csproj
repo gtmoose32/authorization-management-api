@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>AuthorizationManagement.Shared</AssemblyName>
-    <RootNamespace>AuthorizationManagement.Shared</RootNamespace>
+    <AssemblyName>AuthorizationManagement.Api.Models</AssemblyName>
+    <RootNamespace>AuthorizationManagement.Api.Models</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

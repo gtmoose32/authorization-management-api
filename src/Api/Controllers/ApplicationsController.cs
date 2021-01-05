@@ -1,5 +1,6 @@
-﻿using AuthorizationManagement.Shared;
-using AuthorizationManagement.Shared.Dto;
+﻿using AuthorizationManagement.Api.Extensions;
+using AuthorizationManagement.Api.Models.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -14,47 +15,38 @@ namespace AuthorizationManagement.Api.Controllers
     [ApiController]
     public class ApplicationsController : ContainerControllerBase<Application>
     {
-        public ApplicationsController(Container container) 
-            : base(container, DocumentType.Application)
+        public ApplicationsController(Container container, IMapper mapper) 
+            : base(container, mapper, DocumentType.Application)
         {
         }
         
-        // GET: api/<ApplicationsController>
-        [ProducesResponseType(typeof(IEnumerable<ApplicationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<Models.Application>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
             var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = '{DocumentType}'");
             var options = new QueryRequestOptions { MaxItemCount = 1000 };
-
+            
             var apps = await Container.WhereAsync<Application>(query, options).ConfigureAwait(false);
-            return Ok(apps.Select(app => new { app.Id, app.Name, app.GroupCount, app.UserCount }));
+            return Ok(apps.Select(a => Mapper.Map<Models.Application>(a)).ToArray());
         }
         
-        // GET api/<ApplicationsController>/5
-        [ProducesResponseType(typeof(ApplicationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.Application), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(string id)
         {
             var app = await GetDocumentAsync(id, id).ConfigureAwait(false);
             if (app == null) return NotFound();
 
-            return Ok(new { app.Id, app.Name, app.GroupCount, app.UserCount });
+            return Ok(Mapper.Map<Models.Application>(app));
         }
 
-        // POST api/<ApplicationsController>
-        [ProducesResponseType(typeof(ApplicationDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Models.Application), StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] ApplicationDto appDto)
+        public async Task<IActionResult> PostAsync([FromBody] Models.Application appDto)
         {
-            var app = new Application(appDto)
-            {
-                GroupCount = 0,
-                UserCount = 0
-            };
-
-            app = await CreateAsync(app).ConfigureAwait(false);
-            return CreatedAtRoute(nameof(GetAsync), new {id = app.Id}, new { app.Id, app.Name, app.GroupCount, app.UserCount });
+            var app = await CreateDocumentAsync(Mapper.Map<Application>(appDto)).ConfigureAwait(false);
+            return Ok(Mapper.Map<Models.Application>(app));
         }
     }
 }
