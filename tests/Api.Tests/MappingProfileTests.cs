@@ -4,6 +4,7 @@ using AutoMapper;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace AuthorizationManagement.Api.Tests
 {
@@ -99,6 +100,7 @@ namespace AuthorizationManagement.Api.Tests
             result.Enabled.Should().Be(user.Enabled);
             result.FirstName.Should().Be(user.FirstName);
             result.LastName.Should().Be(user.LastName);
+            result.Groups.All(grp => user.Groups.Any(g => g.Id.Equals(grp))).Should().BeTrue();
         }
 
         [TestMethod]
@@ -117,38 +119,25 @@ namespace AuthorizationManagement.Api.Tests
             result.Enabled.Should().Be(user.Enabled);
             result.FirstName.Should().Be(user.FirstName);
             result.LastName.Should().Be(user.LastName);
+            result.Groups.Should().BeEmpty();
         }
 
         [TestMethod]
-        public void UserGroup_MapToDocument_Test()
+        public void User_MapTo_UserInfo_Test()
         {
             //Arrange
-            var ug = _fixture.Create<Models.UserGroup>();
+            var user = _fixture.Create<User>();
 
             //Act
-            var result = _sut.Map<UserGroup>(ug);
+            var result = _sut.Map<Models.UserInfo>(user);
 
             //Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(ug.Id);
-            result.GroupId.Should().Be(ug.GroupId);
-            result.UserId.Should().Be(ug.UserId);
-        }
-
-        [TestMethod]
-        public void UserGroup_MapToDto_Test()
-        {
-            //Arrange
-            var ug = _fixture.Create<UserGroup>();
-
-            //Act
-            var result = _sut.Map<Models.UserGroup>(ug);
-
-            //Assert
-            result.Should().NotBeNull();
-            result.Id.Should().Be(ug.Id);
-            result.GroupId.Should().Be(ug.GroupId);
-            result.UserId.Should().Be(ug.UserId);
+            result.Id.Should().Be(user.Id);
+            result.Email.Should().Be(user.Email);
+            result.Enabled.Should().Be(user.Enabled);
+            result.FirstName.Should().Be(user.FirstName);
+            result.LastName.Should().Be(user.LastName);
         }
     }
 }

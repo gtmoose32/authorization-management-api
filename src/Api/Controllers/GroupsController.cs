@@ -46,22 +46,25 @@ namespace AuthorizationManagement.Api.Controllers
             var userIds = (await GetUserIdsFromGroupAsync(applicationId, id).ConfigureAwait(false)).ToArray();
             if (!userIds.Any()) return Ok(Enumerable.Empty<Models.User>());
 
-            var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = 'User' AND c.applicationId = @applicationId AND c.id IN ({CreateInOperatorInput(userIds)})")
+            var query = new QueryDefinition($"SELECT * FROM c WHERE c.documentType = '{DocumentType.User}' AND c.applicationId = @applicationId AND c.id IN ({CreateInOperatorInput(userIds)})")
                 .WithParameter("@applicationId", applicationId);
 
             var users = await Container.WhereAsync<User>(query).ConfigureAwait(false);
 
-            return Ok(users.Select(u => Mapper.Map<Models.User>(u)).ToArray());
+            return Ok(users.Select(u => Mapper.Map<Models.UserInfo>(u)).ToArray());
         }
 
         [ProducesResponseType(typeof(Models.Group), StatusCodes.Status200OK)]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromRoute] string applicationId, [FromBody] Models.Group groupDto)
         {
+            if (!(await ApplicationExistsAsync(applicationId).ConfigureAwait(false)))
+                return NotFound();
+
             var group = Mapper.Map<Group>(groupDto);
             group.ApplicationId = applicationId;
 
-            await CreateAsync(group).ConfigureAwait(false);
+            await CreateDocumentAsync(group).ConfigureAwait(false);
             return Ok(groupDto);
         }
 
@@ -81,27 +84,23 @@ namespace AuthorizationManagement.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] string applicationId, string id)
         {
-            var query = new QueryDefinition($"SELECT value c.id FROM c WHERE c.documentType = '{DocumentType.UserGroup}' AND c.applicationId = @applicationId AND c.groupId = @groupId")
-                .WithParameter("@applicationId", applicationId)
-                .WithParameter("@groupId", id);
-
-            var userGroupIds = (await Container.WhereAsync<string>(query).ConfigureAwait(false)).ToArray();
-            if (userGroupIds.Any())
+            var userIds = (await GetUserIdsFromGroupAsync(applicationId, id)).ToArray();
+            if (userIds.Any())
                 return Conflict(
                     new
                     {
-                        Error = $"Cannot delete Group with id '{id}' due to UserGroup(s) referencing this group.",
-                        ReferencingGroups = userGroupIds
+                        Error = $"Cannot delete group with id '{id}' users are still assigned to this group.",
+                        GroupAssignedUsers = userIds
                     });
 
             await Container.DeleteItemAsync<Group>(id, new PartitionKey(applicationId)).ConfigureAwait(false);
 
             return Ok();
         }
-        
+
         private async Task<IEnumerable<string>> GetUserIdsFromGroupAsync(string applicationId, string groupId)
         {
-            var query = new QueryDefinition("SELECT VALUE c.userId FROM c WHERE c.documentType = 'UserGroup' AND c.applicationId = @applicationId AND c.groupId = @groupId")
+            var query = new QueryDefinition($"SELECT value c.id FROM c WHERE c.documentType = '{DocumentType.User}' AND c.applicationId = @applicationId AND  ARRAY_CONTAINS(c.groups, @groupId)")
                 .WithParameter("@applicationId", applicationId)
                 .WithParameter("@groupId", groupId);
 
