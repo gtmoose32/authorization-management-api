@@ -8,24 +8,16 @@ namespace AuthorizationManagement.Api
     {
         public MappingProfile()
         {
-            CreateMap<Models.Application, Application>()
-                .ForMember(g => g.ETag, cfg => cfg.Ignore())
-                .ForMember(g => g.LastModifiedOn, cfg => cfg.Ignore())
+            CreateMap<Models.Application, Application>(MemberList.None)
                 .ReverseMap();
 
-            CreateMap<Models.Group, Group>()
-                .ForMember(g => g.ApplicationId, cfg => cfg.Ignore())
-                .ForMember(g => g.ETag, cfg => cfg.Ignore())
-                .ForMember(g => g.LastModifiedOn, cfg => cfg.Ignore())
+            CreateMap<Models.Group, Group>(MemberList.None)
                 .ReverseMap();
 
-            CreateMap<Models.User, User>()
-                .ForMember(u => u.Groups, cfg => cfg.MapFrom(user => user.Groups.Select(u => u.Id).ToList()))
-                .ForMember(u => u.ApplicationId, cfg => cfg.Ignore())
-                .ForMember(u => u.ETag, cfg => cfg.Ignore())
-                .ForMember(u => u.LastModifiedOn, cfg => cfg.Ignore());
+            CreateMap<Models.User, User>(MemberList.None)
+                .ForMember(u => u.Groups, cfg => cfg.MapFrom(user => user.Groups.Select(u => u.Id).ToList()));
 
-            CreateMap<User, Models.User>()
+            CreateMap<User, Models.User>(MemberList.None)
                 .ForMember(u => u.Groups, cfg => cfg.Ignore());
             
             CreateMap<User, Models.UserInfo>();
